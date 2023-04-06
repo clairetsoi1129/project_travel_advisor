@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CssBaseline, Grid } from '@material-ui/core';
 
-import { getPlacesData } from './api/travelAdvisorAPI';
+import { getPlacesDataFromAPI } from './api/travelAdvisorAPI';
 import Header from './components/Header/Header';
 import List from './components/List/List';
 import Map from './components/Map/Map';
@@ -11,7 +11,7 @@ const App = () => {
   const [rating, setRating] = useState('');
 
   const [coords, setCoords] = useState({});
-  const [bounds, setBounds] = useState(null);
+  const [bounds, setBounds] = useState({});
 
   const [filteredPlaces, setFilteredPlaces] = useState([]);
   const [places, setPlaces] = useState([]);
@@ -33,16 +33,21 @@ const App = () => {
   }, [rating]);
 
   useEffect(() => {
-    if (bounds) {
+    if (bounds.sw && bounds.ne) {
       setIsLoading(true);
+      const abortController = new AbortController();
 
-      getPlacesData(type, bounds.sw, bounds.ne)
-        .then((data) => {
-          setPlaces(data.filter((place) => place.name && place.num_reviews > 0));
-          setFilteredPlaces([]);
-          setRating('');
-          setIsLoading(false);
-        });
+      const getPlacesData = async() => {
+        getPlacesDataFromAPI(type, bounds.sw, bounds.ne, abortController.signal)
+          .then((data) => {
+            setPlaces(data?.filter((place) => place.name && place.num_reviews > 0));
+            setFilteredPlaces([]);
+            setRating('');
+            setIsLoading(false);
+          });
+      }
+      getPlacesData();
+      return () => abortController.abort();
     }
   }, [bounds, type]);
 

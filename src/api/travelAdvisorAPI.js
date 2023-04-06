@@ -1,7 +1,7 @@
 /* eslint-disable consistent-return */
 import axios from 'axios';
 
-export const getPlacesData = async (type, sw, ne) => {
+export const getPlacesDataFromAPI = async (type, sw, ne, signal) => {
   try {
     const { data: { data } } = await axios.get(`https://travel-advisor.p.rapidapi.com/${type}/list-in-boundary`, {
       params: {
@@ -14,6 +14,7 @@ export const getPlacesData = async (type, sw, ne) => {
         'x-rapidapi-key': process.env.REACT_APP_RAPID_API_TRAVEL_API_KEY,
         'x-rapidapi-host': 'travel-advisor.p.rapidapi.com',
       },
+      signal: signal,
     });
 
     return data;
